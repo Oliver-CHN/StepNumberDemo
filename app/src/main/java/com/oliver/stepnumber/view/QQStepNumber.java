@@ -70,6 +70,7 @@ public class QQStepNumber extends View {
         super(context, attrs);
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.QQStepNumber);
         numberStep = ta.getInt(R.styleable.QQStepNumber_qqNumberStr, 2000);
+        ta.recycle();
         initPint();
     }
 

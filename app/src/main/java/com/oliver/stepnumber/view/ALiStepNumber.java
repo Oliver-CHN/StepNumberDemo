@@ -67,6 +67,7 @@ public class ALiStepNumber extends View {
         super(context, attrs);
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ALiStepNumber);
         numberStep = ta.getInt(R.styleable.ALiStepNumber_aLiNumberStr, 2000);
+        ta.recycle();
         initPint();
     }
 
