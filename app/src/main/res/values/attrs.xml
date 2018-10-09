@@ -2,14 +2,35 @@
 <resources>
 
     <declare-styleable name="QQStepNumber">
-
-        <attr name="qqNumberStr" format="string"/>
+        <attr name="bgColor" format="reference"/>
+        <attr name="gradualColor" format="reference"/>
+        <attr name="strokeWidth" format="dimension"/>
+        <attr name="qqNumber" format="integer"/>
+        <attr name="numberTextSize" format="dimension"/>
+        <attr name="numberTextColor" format="reference"/>
+        <attr name="numberRightTextSize" format="dimension"/>
+        <attr name="numberRightTextColor" format="reference"/>
+        <attr name="numberRightStr" format="string"/>
+        <attr name="hintTextSize" format="dimension"/>
+        <attr name="hintTextColor" format="reference"/>
+        <attr name="hintTextStr" format="string"/>
+        <attr name="limitNumber" format="integer"/>
 
     </declare-styleable>
 
     <declare-styleable name="ALiStepNumber">
 
-        <attr name="aLiNumberStr" format="string"/>
+        <attr name="aLiBgColor" format="reference"/>
+        <attr name="bgStrokeWidth" format="dimension"/>
+        <attr name="aLiCoverColor" format="reference"/>
+        <attr name="coverStrokeWidth" format="dimension"/>
+        <attr name="aLiNumber" format="integer"/>
+        <attr name="aLiNumberTextSize" format="dimension"/>
+        <attr name="aLiNumberTextColor" format="reference"/>
+        <attr name="aLiHintText" format="string"/>
+        <attr name="aLiHintTextSize" format="dimension"/>
+        <attr name="aLiHintTextColor" format="reference"/>
+        <attr name="aLiLimitNumber" format="integer"/>
 
     </declare-styleable>
 

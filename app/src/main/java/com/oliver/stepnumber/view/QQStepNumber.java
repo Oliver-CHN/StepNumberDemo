@@ -13,9 +13,11 @@ import android.graphics.RectF;
 import android.graphics.SweepGradient;
 import android.graphics.Typeface;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.LinearInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
 import com.oliver.stepnumber.R;
 
@@ -27,6 +29,7 @@ public class QQStepNumber extends View {
      * 背景画笔
      */
     private Paint bgPaint;
+    private int bgColor;
 
     /**
      * 覆盖层画笔
@@ -36,9 +39,16 @@ public class QQStepNumber extends View {
     private Paint coverPaint;
 
     /**
+     * 步数
+     */
+    private int numberStep;
+
+    /**
      * “步数”画笔
      */
     private Paint numberText;
+    private int numberTextSize;
+    private int numberTextColor;
 
     /**
      * “步”字画笔
@@ -49,11 +59,35 @@ public class QQStepNumber extends View {
      * 提示字画笔
      */
     private Paint hintText;
+    private int hintTextSize;
+    private int hintTextColor;
 
     /**
-     * 步数
+     * 画笔宽度（默认20）
      */
-    private int numberStep;
+    private int strokeWidth;
+
+    /**
+     * 渐变颜色数组
+     */
+    private int gradualColor;
+
+    /**
+     * 上限步数
+     */
+    private int limitNumber;
+
+    /**
+     * 提示文字
+     */
+    private String hintTextStr;
+
+    /**
+     * 步数右侧的文字
+     */
+    private String numberRightStr;
+    private int numberRightTextSize;
+    private int numberRightTextColor;
 
     /**
      * 宽高、圆弧的中心点、圆弧半径、当前进度、扫过的弧度、矩形、动画
@@ -69,7 +103,19 @@ public class QQStepNumber extends View {
     public QQStepNumber(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.QQStepNumber);
-        numberStep = ta.getInt(R.styleable.QQStepNumber_qqNumberStr, 2000);
+        bgColor = ta.getResourceId(R.styleable.QQStepNumber_bgColor, R.color.bg_color);
+        gradualColor = ta.getResourceId(R.styleable.QQStepNumber_gradualColor, R.array.qq_step);
+        strokeWidth = ta.getDimensionPixelOffset(R.styleable.QQStepNumber_strokeWidth, 20);
+        numberStep = ta.getInt(R.styleable.QQStepNumber_qqNumber, 2000);
+        numberTextSize = ta.getDimensionPixelSize(R.styleable.QQStepNumber_numberTextSize, 32);
+        numberTextColor = ta.getResourceId(R.styleable.QQStepNumber_numberTextColor, Color.BLACK);
+        numberRightTextColor = ta.getResourceId(R.styleable.QQStepNumber_numberRightTextColor, Color.GRAY);
+        numberRightTextSize = ta.getDimensionPixelSize(R.styleable.QQStepNumber_numberRightTextSize, 16);
+        numberRightStr = ta.getString(R.styleable.QQStepNumber_numberRightStr);
+        hintTextSize = ta.getDimensionPixelSize(R.styleable.QQStepNumber_hintTextSize, 16);
+        hintTextColor = ta.getResourceId(R.styleable.QQStepNumber_hintTextColor, Color.GRAY);
+        hintTextStr = ta.getString(R.styleable.QQStepNumber_hintTextStr);
+        limitNumber = ta.getInt(R.styleable.QQStepNumber_limitNumber, 5000);
         ta.recycle();
         initPint();
     }
@@ -79,35 +125,35 @@ public class QQStepNumber extends View {
         bgPaint = new Paint();
         bgPaint.setAntiAlias(true);
         bgPaint.setStyle(Paint.Style.STROKE);
-        bgPaint.setStrokeWidth(20);
-        bgPaint.setColor(Color.parseColor("#E1EDFF"));
+        bgPaint.setStrokeWidth(strokeWidth);
+        bgPaint.setColor(ContextCompat.getColor(getContext(), bgColor));
         // 覆盖层画笔
         coverPaint = new Paint();
         coverPaint.setAntiAlias(true);
         coverPaint.setStyle(Paint.Style.STROKE);
-        coverPaint.setStrokeWidth(20);
+        coverPaint.setStrokeWidth(strokeWidth);
         // 为覆盖层画笔设置渐变渲染器
         SweepGradient mSweepGradient = new SweepGradient(this.getWidth() / 2, this.getHeight() / 2,
-                new int[]{0xFF1571FA, 0x7F1571FA, 0xFF1571FA, 0x7F1571FA}, null);
+                getResources().getIntArray(gradualColor), null);
         coverPaint.setShader(mSweepGradient);
         //步数
         numberText = new Paint();
         numberText.setAntiAlias(true);
-        numberText.setColor(Color.BLACK);
-        numberText.setTextSize(100);
+        numberText.setColor(ContextCompat.getColor(getContext(), numberTextColor));
+        numberText.setTextSize(numberTextSize);
         numberText.setTypeface(Typeface.DEFAULT_BOLD);
         numberText.setTextAlign(Paint.Align.CENTER);
         //步字
         stepText = new Paint();
         stepText.setAntiAlias(true);
-        stepText.setColor(Color.BLACK);
-        stepText.setTextSize(45);
+        stepText.setColor(ContextCompat.getColor(getContext(), numberRightTextColor));
+        stepText.setTextSize(numberRightTextSize);
         stepText.setTextAlign(Paint.Align.CENTER);
         // 提示字
         hintText = new Paint();
         hintText.setAntiAlias(true);
-        hintText.setColor(Color.GRAY);
-        hintText.setTextSize(45);
+        hintText.setColor(ContextCompat.getColor(getContext(), hintTextColor));
+        hintText.setTextSize(hintTextSize);
         hintText.setTextAlign(Paint.Align.CENTER);
     }
 
@@ -145,8 +191,8 @@ public class QQStepNumber extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         // 5000步为一圈， 5000步也只显示一圈
-        if (numberStep / 5000 < 1) {
-            sweepAngle = (float) (240 * numberStep / 5000 * (currentProgress / 100.00));
+        if (numberStep / limitNumber < 1) {
+            sweepAngle = (float) (240 * numberStep / limitNumber * (currentProgress / 100.00));
         } else {
             sweepAngle = (float) (240 * (currentProgress / 100.00));
         }
@@ -159,15 +205,21 @@ public class QQStepNumber extends View {
         int baseline = (int) (centerY - fontMetrics.top / 2 - fontMetrics.bottom / 2);
         // 字体宽度
         Rect numberRect = new Rect();
-        String numberStr = String.valueOf((int) (numberStep * currentProgress/100));
+        String numberStr = String.valueOf((int) (numberStep * currentProgress / 100));
         numberText.getTextBounds(numberStr, 0, numberStr.length(), numberRect);
 
         Rect stepRect = new Rect();
-        stepText.getTextBounds("步", 0, 1, stepRect);
+        if (!TextUtils.isEmpty(numberRightStr)) {
+            stepText.getTextBounds(numberRightStr, 0, 1, stepRect);
+        }
 
         canvas.drawText(numberStr, centerX - stepRect.width() * 2 / 3, baseline, numberText);
-        canvas.drawText("步", centerX + numberRect.width() / 2, baseline, stepText);
-        canvas.drawText("满5000步打卡", centerX, centerX + radius / 2, hintText);
+        if (!TextUtils.isEmpty(numberRightStr)) {
+            canvas.drawText(numberRightStr, centerX + numberRect.width() / 2, baseline, stepText);
+        }
+        if (!TextUtils.isEmpty(hintTextStr)) {
+            canvas.drawText(hintTextStr, centerX, centerX + radius / 2, hintText);
+        }
     }
 
     public void start() {
@@ -177,7 +229,7 @@ public class QQStepNumber extends View {
     private ValueAnimator animationToCircle() {
         animator = ValueAnimator.ofFloat(0, 100);
         animator.setDuration(2000);
-        animator.setInterpolator(new LinearInterpolator());
+        animator.setInterpolator(new DecelerateInterpolator());
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {

@@ -15,7 +15,19 @@
             android:layout_height="200dp"
             android:layout_gravity="center_horizontal"
             android:padding="10dp"
-            app:qqNumberStr="1123" />
+            app:bgColor="@color/bg_color"
+            app:gradualColor="@array/qq_step"
+            app:strokeWidth="10dp"
+            app:qqNumber="3999"
+            app:numberTextSize="32sp"
+            app:numberTextColor="@android:color/black"
+            app:numberRightStr="步"
+            app:numberRightTextSize="16sp"
+            app:numberRightTextColor="@android:color/darker_gray"
+            app:hintTextSize="16sp"
+            app:hintTextColor="@android:color/darker_gray"
+            app:hintTextStr="满5000步打卡"
+            app:limitNumber="5000"/>
 
         <com.oliver.stepnumber.view.ALiStepNumber
             android:id="@+id/ali_step_number"
@@ -23,7 +35,17 @@
             android:layout_height="200dp"
             android:layout_gravity="center_horizontal"
             android:padding="10dp"
-            app:aLiNumberStr="2230" />
+            app:aLiBgColor="@color/bg_color"
+            app:bgStrokeWidth="8dp"
+            app:aLiCoverColor="@color/cover_color"
+            app:coverStrokeWidth="12dp"
+            app:aLiNumber="3333"
+            app:aLiNumberTextSize="32sp"
+            app:aLiNumberTextColor="@color/black"
+            app:aLiHintText="今日步数"
+            app:aLiHintTextSize="16dp"
+            app:aLiHintTextColor="@android:color/darker_gray"
+            app:aLiLimitNumber="5000" />
 
         <Button
             android:id="@+id/btn_reset"

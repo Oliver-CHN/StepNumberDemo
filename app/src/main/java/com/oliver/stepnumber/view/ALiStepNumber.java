@@ -7,12 +7,13 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.graphics.SweepGradient;
 import android.graphics.Typeface;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.animation.LinearInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
 import com.oliver.stepnumber.R;
 
@@ -38,9 +39,16 @@ public class ALiStepNumber extends View {
     private Paint smallCirclePaint;
 
     /**
+     * 步数
+     */
+    private int numberStep;
+
+    /**
      * “步数”画笔
      */
     private Paint numberText;
+    private int numberTextSize;
+    private int numberTextColor;
 
     /**
      * 今日步数字画笔
@@ -48,9 +56,28 @@ public class ALiStepNumber extends View {
     private Paint hintText;
 
     /**
-     * 步数
+     * 宽度
      */
-    private int numberStep;
+    private int bgStrokeWidth;
+    private int coverStrokeWidth;
+
+    /**
+     * 颜色
+     */
+    private int bgColor;
+    private int coverColor;
+
+    /**
+     * 文字
+     */
+    private String hintStr;
+    private int hintTextSize;
+    private int hintTextColor;
+
+    /**
+     * 上限步数
+     */
+    private int limitNumber;
 
     /**
      * 宽高、圆弧的中心点、圆弧半径、当前进度、扫过的弧度、矩形、动画
@@ -66,7 +93,17 @@ public class ALiStepNumber extends View {
     public ALiStepNumber(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ALiStepNumber);
-        numberStep = ta.getInt(R.styleable.ALiStepNumber_aLiNumberStr, 2000);
+        bgColor = ta.getResourceId(R.styleable.ALiStepNumber_aLiBgColor, R.color.bg_color);
+        bgStrokeWidth = ta.getDimensionPixelOffset(R.styleable.ALiStepNumber_bgStrokeWidth, 16);
+        coverColor = ta.getResourceId(R.styleable.ALiStepNumber_aLiCoverColor, R.color.cover_color);
+        coverStrokeWidth = ta.getDimensionPixelOffset(R.styleable.ALiStepNumber_coverStrokeWidth, 32);
+        numberStep = ta.getInt(R.styleable.ALiStepNumber_aLiNumber, 2000);
+        numberTextSize = ta.getDimensionPixelSize(R.styleable.ALiStepNumber_aLiNumberTextSize, 32);
+        numberTextColor = ta.getResourceId(R.styleable.ALiStepNumber_aLiNumberTextColor, Color.BLACK);
+        hintTextSize = ta.getDimensionPixelSize(R.styleable.ALiStepNumber_aLiHintTextSize, 16);
+        hintTextColor = ta.getResourceId(R.styleable.ALiStepNumber_aLiHintTextColor, Color.GRAY);
+        hintStr = ta.getString(R.styleable.ALiStepNumber_aLiHintText);
+        limitNumber = ta.getInt(R.styleable.ALiStepNumber_aLiLimitNumber, 5000);
         ta.recycle();
         initPint();
     }
@@ -76,38 +113,35 @@ public class ALiStepNumber extends View {
         bgPaint = new Paint();
         bgPaint.setAntiAlias(true);
         bgPaint.setStyle(Paint.Style.STROKE);
-        bgPaint.setStrokeWidth(16);
-        bgPaint.setColor(Color.parseColor("#EFEFEE"));
+        bgPaint.setStrokeWidth(bgStrokeWidth);
+        bgPaint.setColor(ContextCompat.getColor(getContext(),bgColor));
         // 覆盖层画笔
         coverPaint = new Paint();
         coverPaint.setAntiAlias(true);
         coverPaint.setStyle(Paint.Style.STROKE);
-        coverPaint.setStrokeWidth(32);
+        coverPaint.setStrokeWidth(coverStrokeWidth);
+        coverPaint.setColor(ContextCompat.getColor(getContext(),coverColor));
         //两端变圆弧
         coverPaint.setStrokeCap(Paint.Cap.ROUND);
-        // 为覆盖层画笔设置渐变渲染器
-        SweepGradient mSweepGradient = new SweepGradient(this.getWidth() / 2, this.getHeight() / 2,
-                new int[]{0xFFFFB401, 0x7FFFB401, 0xFFFFB401, 0x7FFFB401}, null);
-        coverPaint.setShader(mSweepGradient);
         //步数
         numberText = new Paint();
         numberText.setAntiAlias(true);
-        numberText.setColor(Color.BLACK);
-        numberText.setTextSize(100);
+        numberText.setColor(ContextCompat.getColor(getContext(),numberTextColor));
+        numberText.setTextSize(numberTextSize);
         numberText.setTypeface(Typeface.DEFAULT_BOLD);
         numberText.setTextAlign(Paint.Align.CENTER);
         // 提示字
         hintText = new Paint();
         hintText.setAntiAlias(true);
-        hintText.setColor(Color.GRAY);
-        hintText.setTextSize(45);
+        hintText.setColor(ContextCompat.getColor(getContext(),hintTextColor));
+        hintText.setTextSize(hintTextSize);
         hintText.setTextAlign(Paint.Align.CENTER);
         //小圆
         smallCirclePaint = new Paint();
         smallCirclePaint.setAntiAlias(true);
         coverPaint.setStyle(Paint.Style.STROKE);
         smallCirclePaint.setColor(Color.WHITE);
-        smallCirclePaint.setStrokeWidth(16);
+        smallCirclePaint.setStrokeWidth(bgStrokeWidth);
     }
 
     @Override
@@ -138,8 +172,8 @@ public class ALiStepNumber extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         // 5000步为一圈， 5000步也只显示一圈
-        if (numberStep / 5000 < 1) {
-            sweepAngle = (float) (360 * numberStep / 5000 * (currentProgress / 100.00));
+        if (numberStep / limitNumber < 1) {
+            sweepAngle = (float) (360 * numberStep / limitNumber * (currentProgress / 100.00));
         } else {
             sweepAngle = (float) (360 * (currentProgress / 100.00));
         }
@@ -157,7 +191,9 @@ public class ALiStepNumber extends View {
         String numberStr = String.valueOf((int) (numberStep * currentProgress / 100));
         canvas.drawText(numberStr, centerX, baseline, numberText);
         // fontMetrics.top 为负数，所以只需要 +
-        canvas.drawText("今日步数", centerX, centerX + fontMetrics.ascent, hintText);
+        if (!TextUtils.isEmpty(hintStr)) {
+            canvas.drawText(hintStr, centerX, centerX + fontMetrics.ascent, hintText);
+        }
     }
 
     public void start() {
@@ -167,7 +203,7 @@ public class ALiStepNumber extends View {
     private ValueAnimator animationToCircle() {
         animator = ValueAnimator.ofFloat(0, 100);
         animator.setDuration(2000);
-        animator.setInterpolator(new LinearInterpolator());
+        animator.setInterpolator(new DecelerateInterpolator());
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {

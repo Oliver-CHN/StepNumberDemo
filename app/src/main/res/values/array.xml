@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <integer-array name="qq_step">
+        <item>0xFF1571FA</item>
+        <item>0x7F1571FA</item>
+        <item>0xFF1571FA</item>
+        <item>0x7F1571FA</item>
+    </integer-array>
+    
+</resources>
