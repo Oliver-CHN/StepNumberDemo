@@ -34,4 +34,18 @@
 
     </declare-styleable>
 
+    <declare-styleable name="SpeedOfProgressView">
+
+        <attr name="pBgColor" format="reference"/>
+        <attr name="pBgStrokeWidth" format="dimension"/>
+        <attr name="pCoverColor" format="reference"/>
+        <attr name="pCoverStrokeWidth" format="dimension"/>
+        <attr name="pTextSize" format="dimension"/>
+        <attr name="pTextColor" format="reference"/>
+        <attr name="pCurrent" format="integer"/>
+        <attr name="pMax" format="integer"/>
+        <attr name="pFirstIsShow" format="boolean"/>
+
+    </declare-styleable>
+
 </resources>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.oliver.stepnumber.view.SpeedOfProgressView
+        android:id="@+id/speed_of_progress"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center_horizontal"
+        android:padding="10dp"
+        app:pBgColor="@color/bg_color"
+        app:pBgStrokeWidth="12dp"
+        app:pCoverColor="@color/redEF5050"
+        app:pCoverStrokeWidth="12dp"
+        app:aLiNumber="3333"
+        app:pTextSize="32sp"
+        app:pCurrent="60"
+        app:pTextColor="@color/black"/>
+
+    <Button
+        android:id="@+id/btn_start_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:text="开始"/>
+
+</LinearLayout>
